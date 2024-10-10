@@ -86,18 +86,22 @@ func main() {
 			// fmt.Print(">>> something on outchan:")
 			// fmt.Print(b)
 			// fmt.Fprint(os.Stdout, string(b))
-			outRune := parsy.Parse(b)
-			outString += string(outRune)
-			gotOut = true
+			outRune, kay := parsy.Parse(b)
+			if kay {
+				outString += string(outRune)
+				gotOut = true
+			}
 			continue
 
 		case c := <-errChan:
 			// fmt.Print(">>> something on errchan:")
 			// fmt.Print(c)
 			// fmt.Fprint(os.Stdout, string(c))
-			errRune := parsyerr.Parse(c)
-			errString += string(errRune)
-			gotErr = true
+			errRune, kay := parsyerr.Parse(c)
+			if kay {
+				errString += string(errRune)
+				gotErr = true
+			}
 			continue
 
 		default:
@@ -133,6 +137,7 @@ func main() {
 			gui.DisplayTextAtPos(fmt.Sprint(framecount), 0, 0)
 
 			if len(contend) > 1 {
+				gui.DisplayTextLinesAtPos(string(len(contend)), 0, 20, 0)
 				gui.DisplayTextLinesAtPos(contend[len(contend)-1], 0, 50, 0)
 			}
 

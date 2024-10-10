@@ -21,8 +21,8 @@ func GuiTest() {
 }
 
 // WIP Params
-const charHeight = 20
-const charWidth = 10
+const charHeight = 15
+const charWidth = 8
 
 const windowHeight = 800
 const windowWidth = 600
@@ -141,7 +141,7 @@ func (tg *Window) DisplayTextAtPos(text string, x int, y int) {
 }
 
 // display multiple lines at position
-func (w *Window) DisplayTextLinesAtPos(text string, x int, y int, s int) {
+func (w *Window) DisplayTextLinesAtPos(text string, x int, y int, s int) { // s = spacing
 	lines := strings.Split(text, "\n")
 
 	var fg sdl.Color = sdl.Color{R: 255, G: 255, B: 255, A: 255}

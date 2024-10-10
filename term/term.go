@@ -98,42 +98,53 @@ type ByteParser struct {
 	buffer []byte
 }
 
-func (bp *ByteParser) Parse(inByte byte) rune {
+func (bp *ByteParser) Parse(inByte byte) (r rune, ok bool) {
 
+	// first time setup
 	if bp.buffer == nil {
 		bp.buffer = make([]byte, 0, 4)
 	}
 	bp.buffer = append(bp.buffer, inByte)
 
-	// try parsing and printing
+	// try parsing
 	if len(bp.buffer) == 0 {
 		fmt.Println(">>> error byte buffer still 0!")
 	}
 
-	r, runeLen := ProcessBytes(bp.buffer)
-
-	// remove consumed bytes
-	bp.buffer = bp.buffer[runeLen:]
-	return r
-
-}
-
-func ProcessBytes(inBytes []byte) (r rune, runeLen int) {
-	start := utf8.RuneStart(inBytes[0])
+	// r, runeLen := ProcessBytes(bp.buffer)
+	start := utf8.RuneStart(bp.buffer[0])
 	if !start {
 		fmt.Println(">>> pars error not start")
-		return 0, 1
+		return 0, false
 	}
-	r, l := utf8.DecodeRune(inBytes)
+	r, l := utf8.DecodeRune(bp.buffer)
 	if r == utf8.RuneError {
 		// fmt.Println(">>> pars error RuneError:", r, l)
-		return 0, 0
+		return 0, false
 	}
 
-	// fmt.Print(string(r))
-	return r, l
+	// remove consumed bytes
+	bp.buffer = bp.buffer[l:]
+	return r, true
 
 }
+
+// func ProcessBytes(inBytes []byte) (r rune, runeLen int) {
+// 	start := utf8.RuneStart(inBytes[0])
+// 	if !start {
+// 		fmt.Println(">>> pars error not start")
+// 		return 0, 1
+// 	}
+// 	r, l := utf8.DecodeRune(inBytes)
+// 	if r == utf8.RuneError {
+// 		// fmt.Println(">>> pars error RuneError:", r, l)
+// 		return 0, 0
+// 	}
+//
+// 	// fmt.Print(string(r))
+// 	return r, l
+//
+// }
 
 // Test stuff ==============================================================
 func TestPanel() Panel {

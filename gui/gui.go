@@ -147,6 +147,10 @@ func (w *Window) DisplayTextLinesAtPos(text string, x int, y int, s int) { // s 
 	var fg sdl.Color = sdl.Color{R: 255, G: 255, B: 255, A: 255}
 
 	for i, l := range lines {
+		if len(l) == 0 {
+			fmt.Println("ERR: got line with len zero: loop= ", i, y)
+			continue
+		}
 		rect2 := sdl.Rect{X: int32(x), Y: int32(y + (i*charHeight + s)), W: int32(len(l) * charWidth), H: charHeight}
 
 		msgsurface, err := w.Font.RenderUTF8Blended(l, fg)

@@ -15,6 +15,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"strconv"
 	"time"
 
 	"local/ozterm/dog"
@@ -137,7 +138,7 @@ func main() {
 			gui.DisplayTextAtPos(fmt.Sprint(framecount), 0, 0)
 
 			if len(contend) > 1 {
-				gui.DisplayTextLinesAtPos(string(len(contend)), 0, 20, 0)
+				gui.DisplayTextLinesAtPos(strconv.Itoa(len(contend)), 0, 20, 0)
 				gui.DisplayTextLinesAtPos(contend[len(contend)-1], 0, 50, 0)
 			}
 

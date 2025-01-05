@@ -133,7 +133,7 @@ func RunProg2() {
 }
 
 // REM: ========================================================================
-func RunProg3(ended chan<- bool, outputChan chan<- byte, errChan chan<- byte, inputChan <-chan int) {
+func RunProg3(ended chan<- bool, outputChan chan<- byte, errChan chan<- byte, inputChan <-chan byte) {
 
 	me, err := user.Current()
 	if err != nil {
@@ -153,11 +153,42 @@ func RunProg3(ended chan<- bool, outputChan chan<- byte, errChan chan<- byte, in
 	progArgs := []string{"-i"}
 	cmd := exec.Command(shelly, progArgs...)
 
-	cmd.Stdin = os.Stdin
+	// cmd.Stdin = os.Stdin
 	// cmd.Stderr = os.Stdout
 	// cmd.Stdout = os.Stdout
 
 	// os.Stderr.Close()
+
+	//TEST: Input piping
+
+	progInput, err := cmd.StdinPipe()
+	if err != nil {
+		log.Println(">>> error setting input pipe: ", err)
+		return
+	}
+
+	inputData := make([]byte, 128)
+	bufProgInput := bufio.NewWriter(progInput)
+	go func() {
+		for {
+			select {
+			case data := <-inputChan:
+				{
+					inputData = append(inputData, data)
+					_, err := bufProgInput.Write(inputData)
+					if err != nil {
+						fmt.Println(">>> error writing input to chan: ", err)
+					}
+				}
+			default:
+				if bufProgInput.Buffered() >= 1 {
+					bufProgInput.Flush()
+				}
+
+			}
+
+		}
+	}()
 
 	progErr, err := cmd.StderrPipe()
 	if err != nil {
@@ -171,10 +202,10 @@ func RunProg3(ended chan<- bool, outputChan chan<- byte, errChan chan<- byte, in
 		return
 	}
 
+	//REM: handle stdout
 	outputData := make([]byte, 128)
 	bufProgOutput := bufio.NewReader(progOutput)
 
-	//handle stdout
 	go func() {
 		for {
 			_, err := bufProgOutput.Read(outputData)
@@ -189,10 +220,10 @@ func RunProg3(ended chan<- bool, outputChan chan<- byte, errChan chan<- byte, in
 		}
 	}()
 
+	//REM: handle stderr
 	errData := make([]byte, 128)
 	bufProgErr := bufio.NewReader(progErr)
 
-	//handle stderr
 	go func() {
 		for {
 			_, err := bufProgErr.Read(errData)

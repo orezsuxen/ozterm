@@ -13,6 +13,7 @@ package main
 //? session -> a group and screens
 
 import (
+	"encoding/binary"
 	"fmt"
 	"log"
 	"strconv"
@@ -57,7 +58,8 @@ func main() {
 	ended := make(chan bool)
 	outputChan := make(chan byte, 1024)
 	errChan := make(chan byte, 1024)
-	go runner.RunProg3(ended, outputChan, errChan, nil)
+	inputChan := make(chan byte, 1024)
+	go runner.RunProg3(ended, outputChan, errChan, inputChan)
 
 	var parsy term.ByteParser
 	var parsyerr term.ByteParser
@@ -111,6 +113,17 @@ func main() {
 			if ins.Quit || ins.KeysState[sdl.SCANCODE_ESCAPE] {
 				done = true
 				continue
+			}
+			keys := ins.Drain()
+			for _, k := range keys {
+				bs := make([]byte, 4)
+				binary.LittleEndian.PutUint32(bs, uint32(k))
+				for _, b := range bs {
+					if b != 0 {
+						fmt.Println(">>> got input: ", b)
+						inputChan <- b
+					}
+				}
 			}
 
 			gui.Clear()
